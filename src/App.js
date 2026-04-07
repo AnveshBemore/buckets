@@ -1,25 +1,37 @@
-import logo from './logo.svg';
 import './App.css';
+import React, { useState } from "react";
 
 function App() {
+  const [buckets, setBuckets] = useState([]);
+  
+    const createBuckets = () => {
+      const newBuckets = Array.from({ length: 5 }, (_, i) => ({
+        id: buckets.length + i + 1,
+      }));
+      setBuckets([...buckets, ...newBuckets]);
+    };
+  
+    return (
+      <div className="app">
+        <button onClick={createBuckets}>Create Buckets</button>
+  
+        <div className="container">
+          {buckets.map((bucket, index) => (
+            <Bucket key={bucket.id} index={index} label={`Frame ${bucket.id}`} />
+          ))}
+        </div>
+      </div>
+    );
+}
+
+function Bucket({ index, label }) {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={`bucket ${index % 2 === 0 ? "light" : "dark"}`}>
+      <div className="fill" />
+      <div className="text">{label}</div>
     </div>
   );
 }
+
 
 export default App;
