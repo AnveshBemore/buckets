@@ -82,3 +82,48 @@ button:hover {
   height: 100%;
   font-weight: bold;
 }
+.u-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 300px;
+  height: 200px;
+  margin: 50px auto;
+  position: relative;
+}
+
+/* Left vertical bar - Rounded ONLY on top */
+.vertical {
+  width: 40px;
+  height: 150px;
+  background-color: #3498db;
+  border-radius: 20px 20px 0 0;     /* Top-left and Top-right rounded, bottom flat */
+}
+
+/* Right vertical bar - Rounded ONLY on top */
+.right {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 40px;
+  height: 150px;
+  background-color: #3498db;
+  border-radius: 20px 20px 0 0;     /* Top-left and Top-right rounded, bottom flat */
+}
+
+/* Bottom horizontal bar - Rounded on left and right sides */
+.horizontal {
+  position: absolute;
+  bottom: 0;
+  left: 40px;
+  right: 40px;
+  height: 40px;
+  background-color: #3498db;
+}
+
+/* Optional helper class */
+.left {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}

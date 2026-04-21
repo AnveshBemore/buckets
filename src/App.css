@@ -10,40 +10,126 @@ body {
   align-items: center;
   padding: 40px;
   color: white;
+  gap: 40px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 40px;
 }
 
 button {
-  padding: 12px 20px;
+  padding: 12px 24px;
   background: #3b82f6;
   border: none;
   border-radius: 8px;
   color: white;
-  font-size: 16px;
   cursor: pointer;
-  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.create-stuff-btn {
+  background: #22c55e;
+}
+
+/* Main Expanding Container */
+.u-container {
+  position: relative;
+  border-radius: 16px;
+  padding: 100px 100px ;
+  min-width: 420px;
+  transition: all 0.3s ease;
+  
+}
+
+
+/* Label positioned on the left side */
+.uc-label-wrapper {
+  position: absolute;
+  top: 28px;
+  left: -4px;
+  background: #0f172a;
+  padding: 6px 16px 6px 20px;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 10;
+  border: 4px solid #22c55e;
+}
+
+.u-container.active .uc-label-wrapper {
+  border-color: #3b82f6;
+}
+
+.uc-label-text {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.edit-icon {
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.uc-label-wrapper:hover .edit-icon {
+  opacity: 1;
+}
+
+/* Blue border around frames */
+.frames-wrapper {
+  border: 3px solid #3b82f6;
+  border-radius: 12px;
+  /* padding: 30px 40px; */
+  width: 4000px;
+  height: 400px;
+  position: relative;
+  display: block;
+  
+}
+
+.frames-wrapper.active {
+  border-color: #4185f4;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+/* Frames layout */
+.frames-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.frame-row {
+  display: flex;
+  gap: 80px;
+  justify-content: center;
+}
+
+/* Bucket styles */
+.bucket {
+  position: relative;
+  width: 148px;
+  height: 58px;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
   transition: transform 0.2s ease;
 }
 
-button:hover {
-  transform: scale(1.05);
-}
-
-.container {
-  width: 320px;
-}
-
-.bucket {
-  position: relative;
-  height: 50px;
-  margin: 10px 0;
-  border-radius: 12px;
-  overflow: hidden;
-  transform: perspective(600px) rotateX(0deg);
-  transition: transform 0.3s ease;
-}
-
 .bucket:hover {
-  transform: perspective(600px) rotateX(12deg);
+  transform: translateY(-3px);
 }
 
 .bucket.light {
@@ -61,24 +147,46 @@ button:hover {
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, #22c55e, #4ade80);
-  animation: fillAnim 1.5s forwards;
+  animation: fillAnim 0.9s forwards;
 }
 
 @keyframes fillAnim {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
+  from { width: 0%; }
+  to { width: 100%; }
 }
 
 .text {
   position: relative;
   z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-weight: bold;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.edit-icon {
+  position: absolute;
+  right: 10px;
+  top: 6px;
+  font-size: 15px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.bucket:hover .edit-icon {
+  opacity: 1;
+}
+
+.edit-input {
+  width: 85%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  z-index: 2;
+}
+
+.empty-hint {
+  font-size: 13px;
+  color: #475569;
+  margin-top: 10px;
 }
