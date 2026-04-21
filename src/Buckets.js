@@ -1,19 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Buckets.css";
 
-let globalFrameId = 1;
-let globalContainerId = 1;
-
 function Buckets() {
-  const [uContainers, setUContainers] = useState([
-    { id: globalContainerId++, name: "PROJECTS", frames: [] }
-  ]);
+  // 1. Retrieve initial data from localStorage on load
+  const [uContainers, setUContainers] = useState(() => {
+    const saved = localStorage.getItem("bucket_app_data");
+    return saved ? JSON.parse(saved) : [
+      { id: 1, name: "PROJECTS", frames: [] }
+    ];
+  });
 
-  const [activeContainerId, setActiveContainerId] = useState(1);
+  const [activeContainerId, setActiveContainerId] = useState(uContainers[0]?.id || null);
   const [editingContainerId, setEditingContainerId] = useState(null);
 
+  // 2. Save to localStorage whenever uContainers state changes
+  useEffect(() => {
+    localStorage.setItem("bucket_app_data", JSON.stringify(uContainers));
+  }, [uContainers]);
+
+  // 3. Helper to generate unique IDs based on existing items
+  const getNextContainerId = () => {
+    return uContainers.length > 0 
+      ? Math.max(...uContainers.map(c => c.id)) + 1 
+      : 1;
+  };
+
+  const getNextFrameId = (frames) => {
+    return frames.length > 0 
+      ? Math.max(...frames.map(f => f.id)) + 1 
+      : 1;
+  };
+
   const createBucket = () => {
-    const newId = globalContainerId++;
+    const newId = getNextContainerId();
     setUContainers(prev => [
       ...prev,
       { id: newId, name: `Container ${newId}`, frames: [] }
@@ -28,11 +47,12 @@ function Buckets() {
       prev.map(uc => {
         if (uc.id === activeContainerId) {
           if (uc.frames.length >= 8) return uc;
+          const newFrameId = getNextFrameId(uc.frames);
           return {
             ...uc,
             frames: [
               ...uc.frames,
-              { id: globalFrameId++, label: `Frame ${globalFrameId - 1}` }
+              { id: newFrameId, label: `Frame ${newFrameId}` }
             ]
           };
         }
@@ -62,6 +82,12 @@ function Buckets() {
     );
   };
 
+  const handleContainerKeyDown = (e) => {
+    if (e.key === "Enter") {
+      setEditingContainerId(null);
+    }
+  };
+
   return (
     <div className="app">
       <div className="toolbar">
@@ -73,6 +99,13 @@ function Buckets() {
         >
           Create Stuff
         </button>
+        {/* Optional: Clear All Button */}
+        <button 
+          style={{background: '#ef4444', marginLeft: '10px'}} 
+          onClick={() => { if(window.confirm("Clear all?")) setUContainers([]); }}
+        >
+          Clear
+        </button>
       </div>
 
       <div className="all-containers">
@@ -82,11 +115,7 @@ function Buckets() {
             className={`u-container ${activeContainerId === uc.id ? "active" : ""}`}
             onClick={() => setActiveContainerId(uc.id)}
           >
-            {/* Editable Label - Positioned on the left like in your screenshot */}
-            <div 
-              className="uc-label-wrapper" 
-              onClick={e => e.stopPropagation()}
-            >
+            <div className="uc-label-wrapper" onClick={e => e.stopPropagation()}>
               {editingContainerId === uc.id ? (
                 <input
                   className="uc-label-input"
@@ -94,6 +123,7 @@ function Buckets() {
                   autoFocus
                   onChange={e => updateContainerName(uc.id, e.target.value)}
                   onBlur={() => setEditingContainerId(null)}
+                  onKeyDown={handleContainerKeyDown}
                 />
               ) : (
                 <>
@@ -108,13 +138,10 @@ function Buckets() {
               )}
             </div>
 
-            {/* Expanding Frames Area with Blue Border */}
             <div className={`frames-wrapper ${activeContainerId === uc.id ? "active" : ""}`}>
               <div className="frames-container">
                 {uc.frames.length === 0 ? (
-                  <span className="empty-hint">
-                    Click "Create Stuff" to add frames
-                  </span>
+                  <span className="empty-hint">Click "Create Stuff"</span>
                 ) : (
                   Array.from({ length: Math.ceil(uc.frames.length / 2) }).map((_, rowIndex) => (
                     <div key={rowIndex} className="frame-row">
@@ -146,6 +173,10 @@ function Buckets() {
 function Bucket({ index, label, onChangeLabel }) {
   const [editing, setEditing] = useState(false);
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") setEditing(false);
+  };
+
   return (
     <div className={`bucket ${index % 2 === 0 ? "light" : "dark"}`}>
       <div className="fill" />
@@ -156,6 +187,7 @@ function Bucket({ index, label, onChangeLabel }) {
           autoFocus
           onChange={e => onChangeLabel(e.target.value)}
           onBlur={() => setEditing(false)}
+          onKeyDown={handleKeyDown}
         />
       ) : (
         <>
