@@ -1,38 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./Buckets.css";
 
-function Buckets() {
-  // 1. Retrieve initial data from localStorage on load
-  const [uContainers, setUContainers] = useState(() => {
-    const saved = localStorage.getItem("bucket_app_data");
-    return saved ? JSON.parse(saved) : [
-      { id: 1, name: "PROJECTS", frames: [] }
-    ];
-  });
+let globalFrameId = 1;
+let globalContainerId = 1;
 
-  const [activeContainerId, setActiveContainerId] = useState(uContainers[0]?.id || null);
+function Buckets() {
+  const [uContainers, setUContainers] = useState([
+    { id: globalContainerId++, name: "PROJECTS", frames: [] }
+  ]);
+
+  const [activeContainerId, setActiveContainerId] = useState(1);
   const [editingContainerId, setEditingContainerId] = useState(null);
 
-  // 2. Save to localStorage whenever uContainers state changes
-  useEffect(() => {
-    localStorage.setItem("bucket_app_data", JSON.stringify(uContainers));
-  }, [uContainers]);
-
-  // 3. Helper to generate unique IDs based on existing items
-  const getNextContainerId = () => {
-    return uContainers.length > 0 
-      ? Math.max(...uContainers.map(c => c.id)) + 1 
-      : 1;
-  };
-
-  const getNextFrameId = (frames) => {
-    return frames.length > 0 
-      ? Math.max(...frames.map(f => f.id)) + 1 
-      : 1;
-  };
-
   const createBucket = () => {
-    const newId = getNextContainerId();
+    const newId = globalContainerId++;
     setUContainers(prev => [
       ...prev,
       { id: newId, name: `Container ${newId}`, frames: [] }
@@ -42,17 +23,15 @@ function Buckets() {
 
   const createStuff = () => {
     if (activeContainerId === null) return;
-
     setUContainers(prev =>
       prev.map(uc => {
         if (uc.id === activeContainerId) {
           if (uc.frames.length >= 8) return uc;
-          const newFrameId = getNextFrameId(uc.frames);
           return {
             ...uc,
             frames: [
               ...uc.frames,
-              { id: newFrameId, label: `Frame ${newFrameId}` }
+              { id: globalFrameId++, label: `Frame ${globalFrameId - 1}` }
             ]
           };
         }
@@ -82,10 +61,25 @@ function Buckets() {
     );
   };
 
+  // Delete a whole container
+  const deleteContainer = (id) => {
+    setUContainers(prev => prev.filter(uc => uc.id !== id));
+    if (activeContainerId === id) setActiveContainerId(null);
+  };
+
+  // Delete a specific frame inside a container
+  const deleteFrame = (containerId, frameId) => {
+    setUContainers(prev =>
+      prev.map(uc =>
+        uc.id === containerId
+          ? { ...uc, frames: uc.frames.filter(f => f.id !== frameId) }
+          : uc
+      )
+    );
+  };
+
   const handleContainerKeyDown = (e) => {
-    if (e.key === "Enter") {
-      setEditingContainerId(null);
-    }
+    if (e.key === "Enter") setEditingContainerId(null);
   };
 
   return (
@@ -98,13 +92,6 @@ function Buckets() {
           disabled={activeContainerId === null}
         >
           Create Stuff
-        </button>
-        {/* Optional: Clear All Button */}
-        <button 
-          style={{background: '#ef4444', marginLeft: '10px'}} 
-          onClick={() => { if(window.confirm("Clear all?")) setUContainers([]); }}
-        >
-          Clear
         </button>
       </div>
 
@@ -128,12 +115,10 @@ function Buckets() {
               ) : (
                 <>
                   <span className="uc-label-text">{uc.name}</span>
-                  <span
-                    className="edit-icon"
-                    onClick={() => setEditingContainerId(uc.id)}
-                  >
-                    ✏️
-                  </span>
+                  <div className="action-icons">
+                    <span className="edit-icon" onClick={() => setEditingContainerId(uc.id)}>✏️</span>
+                    <span className="delete-icon" onClick={() => deleteContainer(uc.id)}>🗑️</span>
+                  </div>
                 </>
               )}
             </div>
@@ -141,23 +126,19 @@ function Buckets() {
             <div className={`frames-wrapper ${activeContainerId === uc.id ? "active" : ""}`}>
               <div className="frames-container">
                 {uc.frames.length === 0 ? (
-                  <span className="empty-hint">Click "Create Stuff"</span>
+                  <span className="empty-hint">Click "Create Stuff" to add frames</span>
                 ) : (
                   Array.from({ length: Math.ceil(uc.frames.length / 2) }).map((_, rowIndex) => (
                     <div key={rowIndex} className="frame-row">
-                      {uc.frames.slice(rowIndex * 2, rowIndex * 2 + 2).map((frame, idx) => {
-                        const globalIndex = rowIndex * 2 + idx;
-                        return (
-                          <Bucket
-                            key={frame.id}
-                            index={globalIndex}
-                            label={frame.label}
-                            onChangeLabel={newLabel =>
-                              updateFrameName(uc.id, frame.id, newLabel)
-                            }
-                          />
-                        );
-                      })}
+                      {uc.frames.slice(rowIndex * 2, rowIndex * 2 + 2).map((frame, idx) => (
+                        <Bucket
+                          key={frame.id}
+                          index={rowIndex * 2 + idx}
+                          label={frame.label}
+                          onDelete={() => deleteFrame(uc.id, frame.id)}
+                          onChangeLabel={newLabel => updateFrameName(uc.id, frame.id, newLabel)}
+                        />
+                      ))}
                     </div>
                   ))
                 )}
@@ -170,7 +151,7 @@ function Buckets() {
   );
 }
 
-function Bucket({ index, label, onChangeLabel }) {
+function Bucket({ index, label, onChangeLabel, onDelete }) {
   const [editing, setEditing] = useState(false);
 
   const handleKeyDown = (e) => {
@@ -192,15 +173,10 @@ function Bucket({ index, label, onChangeLabel }) {
       ) : (
         <>
           <div className="text">{label}</div>
-          <span
-            className="edit-icon"
-            onClick={e => {
-              e.stopPropagation();
-              setEditing(true);
-            }}
-          >
-            ✏️
-          </span>
+          <div className="bucket-action-icons">
+             <span className="edit-icon" onClick={(e) => { e.stopPropagation(); setEditing(true); }}>✏️</span>
+             <span className="delete-icon" onClick={(e) => { e.stopPropagation(); onDelete(); }}>🗑️</span>
+          </div>
         </>
       )}
     </div>

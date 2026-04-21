@@ -199,3 +199,60 @@ button {
   color: #475569;
   margin-top: 10px;
 }
+
+/* Previous styles remain same, add/update these: */
+
+/* Container for grouping Edit and Delete icons */
+.action-icons, .bucket-action-icons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Hover triggers for the Label Wrapper */
+.uc-label-wrapper:hover .action-icons {
+  opacity: 1;
+}
+
+/* Hover triggers for the Buckets */
+.bucket:hover .bucket-action-icons {
+  opacity: 1;
+}
+
+.edit-icon, .delete-icon {
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform 0.1s ease;
+}
+.delete-icon{
+  left:5px;
+}
+.edit-icon:hover, .delete-icon:hover {
+  transform: scale(1.2);
+}
+
+/* Positioning the icons inside the bucket */
+.bucket-action-icons {
+  position: absolute;
+  right: 12px;
+  z-index: 5;
+}
+
+/* Ensure the label input doesn't break the layout */
+.uc-label-input {
+  background: transparent;
+  border: 1px solid #3b82f6;
+  color: white;
+  border-radius: 4px;
+  padding: 2px 4px;
+  width: 100px;
+  outline: none;
+}
+
+/* Make sure the text doesn't overlap icons on mobile */
+.text {
+  padding: 0 20px;
+  text-align: center;
+}
