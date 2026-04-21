@@ -33,6 +33,15 @@ button {
   background: #22c55e;
 }
 
+/* renders the u-containers horizontally */
+.all-containers {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
 /* Main Expanding Container */
 .u-container {
   position: relative;
